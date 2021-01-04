@@ -4,28 +4,12 @@ env:
     PROJECT: github.com/iph
 phases:
   install:
-    runtime-versions:
-      golang: 1.12
     commands:
       - echo CODEBUILD_SRC_DIR - $CODEBUILD_SRC_DIR
-      - echo GOPATH - $GOPATH
-      - echo GOROOT - $GOROOT
-      # Can't recursively copy our same directory (we want to move the go files, but not the cf file)
-      # so we first put into /tmp/temp then copy to the correct directory.
-      - mkdir -p /tmp/temp
-      - cp -R  $CODEBUILD_SRC_DIR/* /tmp/temp
-      - mkdir -p $CODEBUILD_SRC_DIR/$PROJECT
-      # We move to the project dir because go is not properly finding the directory (probably need to upgrade to go 1.11)
-      - cp -R /tmp/temp/* $CODEBUILD_SRC_DIR/$PROJECT
       - cd /tmp && curl -o terraform.zip https://releases.hashicorp.com/terraform/0.12.7/terraform_0.12.7_linux_amd64.zip && unzip terraform.zip && mv terraform /usr/bin
       - cd $CODEBUILD_SRC_DIR/
   build:
     commands:
-      - go version
-      - cd $CODEBUILD_SRC_DIR/
-      - go build -o core_updater $PROJECT/lambdas
-      - zip app.zip core_updater
-      - cp app.zip $CODEBUILD_SRC_DIR/configuration/terraform/stack
-      - cd $CODEBUILD_SRC_DIR/configuration/terraform/stack
-      - terraform init"
-      - terraform apply -var="tag=prod-pdx-c1" -auto-approve
+      - cd $CODEBUILD_SRC_DIR/pipelines/full_aws
+      - terraform init
+      - terraform apply -auto-approve
