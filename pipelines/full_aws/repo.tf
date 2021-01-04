@@ -2,30 +2,11 @@ provider "aws" {
   region = var.region
 }
 
-locals {
-  tag = var.tag
-}
-
-variable "region" {
-  type = "string"
-  default = "us-west-2"
-}
-
-variable "tag" {
-  type = "string"
-}
-
-terraform {
-  backend "s3" {
-    region = "us-west-2"
-  }
-}
-
 resource "aws_codecommit_repository" "core" {
-  repository_name = "${local.tag}-repo"
-  description     = "Core code base"
+  repository_name = "${var.tag}-project"
+  description     = "Core base to commit to"
 
   tags = {
-    stack = local.tag
+    stack = var.tag
   }
 }

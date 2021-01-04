@@ -27,5 +27,5 @@ phases:
       - zip app.zip core_updater
       - cp app.zip $CODEBUILD_SRC_DIR/configuration/terraform/stack
       - cd $CODEBUILD_SRC_DIR/configuration/terraform/stack
-      - terraform init -backend-config="bucket=lambda-stack-leasing-infrastructure-state-717081083047" -backend-config="key=remote/prod-pdx-c1/terraform.state"
+      - terraform init"
       - terraform apply -var="tag=prod-pdx-c1" -auto-approve

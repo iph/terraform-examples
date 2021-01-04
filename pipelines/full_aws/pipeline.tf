@@ -1,10 +1,10 @@
 resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = "${local.tag}-stack-pipeline-artifacts"
+  bucket = "${var.tag}-stack-pipeline-artifacts"
   acl    = "private"
 }
 
 resource "aws_iam_role" "codepipeline_role" {
-  name = "${local.tag}-stack-pipeline-role"
+  name = "${var.tag}-stack-pipeline-role"
 
   assume_role_policy = <<EOF
 {
@@ -24,7 +24,7 @@ EOF
 
 resource "aws_iam_role_policy" "codepipeline_policy" {
   name = "codepipeline_policy"
-  role = "${aws_iam_role.codepipeline_role.id}"
+  role = aws_iam_role.codepipeline_role.id
 
   policy = <<EOF
 {
@@ -69,7 +69,7 @@ EOF
 
 ////////////////// glue code to trigger pipeline events quicker /////////////////
 resource "aws_iam_role" "codepipeline-events" {
-  name = "${local.tag}-stack-cwe-event-poller"
+  name = "${var.tag}-stack-cwe-event-poller"
 
   assume_role_policy = <<EOF
 {
@@ -88,7 +88,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "cwe-policy" {
-  name = "codepipeline_policy"
+  name = "${var.tag}-codepipeline_policy"
   role = aws_iam_role.codepipeline-events.id
 
   policy = <<EOF
@@ -109,7 +109,7 @@ EOF
 }
 
 resource "aws_cloudwatch_event_rule" "code-commit" {
-  name        = "${local.tag}-code-commit-hook"
+  name        = "${var.tag}-code-commit-hook"
   description = "Amazon CloudWatch Events rule to automatically start your pipeline when a change occurs in the AWS CodeCommit source repository and branch. Deleting this may prevent changes from being detected in that pipeline. Read more: http://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-about- starting.html"
 
   event_pattern = <<EOH
@@ -132,7 +132,7 @@ resource "aws_cloudwatch_event_rule" "code-commit" {
       "branch"
     ],
     "referenceName": [
-      "mainline"
+      "main"
     ]
   }
 }
@@ -143,13 +143,13 @@ resource "aws_cloudwatch_event_target" "app_source" {
   rule      = aws_cloudwatch_event_rule.code-commit.name
   target_id = "CodePipeline"
   arn       = aws_codepipeline.codepipeline.arn
-  role_arn = aws_iam_role.codepipeline-events.arn
+  role_arn  = aws_iam_role.codepipeline-events.arn
 }
 
 ///////////////////////end of event poller////////////////////////////////////////
 
 resource "aws_codepipeline" "codepipeline" {
-  name     = "${local.tag}-stack-pipeline"
+  name     = "${var.tag}-stack-pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
@@ -169,9 +169,9 @@ resource "aws_codepipeline" "codepipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        RepositoryName = aws_codecommit_repository.core.repository_name
-        PollForSourceChanges   = false
-        BranchName = "mainline"
+        RepositoryName       = aws_codecommit_repository.core.repository_name
+        PollForSourceChanges = false
+        BranchName           = "main"
       }
     }
   }
@@ -189,7 +189,7 @@ resource "aws_codepipeline" "codepipeline" {
       version          = "1"
 
       configuration = {
-        ProjectName = aws_codebuild_project.codebuild.name
+        ProjectName = aws_codebuild_project.codebuild-infra.name
       }
     }
   }

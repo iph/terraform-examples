@@ -1,5 +1,5 @@
 resource "aws_iam_role" "code_build_role" {
-  name = "${local.tag}-code-build-role"
+  name = "${var.tag}-code-build-role"
 
   assume_role_policy = <<EOF
 {
@@ -45,49 +45,8 @@ resource "aws_iam_role_policy" "build-reqs" {
 POLICY
 }
 
-data "aws_caller_identity" "current" {}
-
-data aws_s3_bucket f {
-  bucket = "infrastructure-state-${data.aws_caller_identity.current.account_id}"
-}
-
-resource "aws_iam_role_policy" "terraform-updates" {
-  role = aws_iam_role.code_build_role.name
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Resource": [
-        "*"
-      ],
-      "Action": [
-        "codepipeline:*",
-        "codebuild:*",
-        "iam:*",
-        "s3:*",
-        "codecommit:*",
-        "states:*",
-        "lambda:*",
-        "dynamodb:*",
-        "events:*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [ "s3:GetObject", "s3:PutObject"],
-      "Resource": ["${data.aws_s3_bucket.f.arn}/*"]
-    }
-  ]
-}
-POLICY
-}
-
-
 resource "aws_codebuild_project" "codebuild-infra" {
-  name          = "${local.tag}-build-infra"
+  name          = "${var.tag}-build-infra"
   description   = "test_codebuild_project"
   build_timeout = "5"
   service_role  = aws_iam_role.code_build_role.arn
@@ -107,11 +66,11 @@ resource "aws_codebuild_project" "codebuild-infra" {
 
     environment_variable {
       name  = "Environment"
-      value = local.tag
+      value = var.tag
     }
   }
 
   tags = {
-    Environment = local.tag
+    Environment = var.tag
   }
 }
