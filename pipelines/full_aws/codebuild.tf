@@ -52,7 +52,7 @@ resource "aws_codebuild_project" "codebuild-infra" {
   service_role  = aws_iam_role.code_build_role.arn
   source {
     type      = "CODEPIPELINE"
-    buildspec = "configuration/terraform/stack/buildspec.yml"
+    buildspec = "pipeline/full_aws/buildspec.yml"
   }
   artifacts {
     type      = "CODEPIPELINE"
