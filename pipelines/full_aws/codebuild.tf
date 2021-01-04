@@ -45,6 +45,34 @@ resource "aws_iam_role_policy" "build-reqs" {
 POLICY
 }
 
+// Policy for fiddling with this terraform infrastructure, so need all the things that will be directly edited
+// by terraform. To make it easier, I went with the services in use, which some people may not like. Edit at will.
+resource "aws_iam_role_policy" "terraform-infra-updates" {
+  role = aws_iam_role.code_build_role.name
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ],
+      "Action": [
+        "codepipeline:*",
+        "codebuild:*",
+        "iam:*",
+        "s3:*",
+        "codecommit:*",
+        "events:*"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
 resource "aws_codebuild_project" "codebuild-infra" {
   name          = "${var.tag}-build-infra"
   description   = "test_codebuild_project"
