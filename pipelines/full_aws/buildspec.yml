@@ -11,5 +11,5 @@ phases:
   build:
     commands:
       - cd $CODEBUILD_SRC_DIR/pipelines/full_aws
-      - terraform init
+      - sh configure.sh example
       - terraform apply -auto-approve

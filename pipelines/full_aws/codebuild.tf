@@ -89,7 +89,7 @@ resource "aws_codebuild_project" "codebuild-infra" {
 
   environment {
     compute_type = "BUILD_GENERAL1_SMALL"
-    image        = "${var.base_image}"
+    image        = var.base_image
     type         = "LINUX_CONTAINER"
 
     environment_variable {
