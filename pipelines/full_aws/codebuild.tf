@@ -65,6 +65,7 @@ resource "aws_iam_role_policy" "terraform-infra-updates" {
         "iam:*",
         "s3:*",
         "codecommit:*",
+        "ecr:*",
         "events:*"
       ]
     }
